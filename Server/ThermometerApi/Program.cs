@@ -18,11 +18,12 @@ InitConfig();
 InitSwaggerServices();
 InitAuthentication();
 RegisterRepositories();
+InitCorsService();
 
 var app = builder.Build();
 
-InitCors();
 InitSwaggerApp();
+InitCors();
 
 RegisterRoutes();
 
@@ -54,7 +55,7 @@ void InitConfig()
     builder.Services.AddSingleton(applicationConfiguration);
 }
 
-void InitCors()
+void InitCorsService()
 {
     if (!applicationConfiguration.UseCors)
     {
@@ -62,12 +63,18 @@ void InitCors()
         return;
     }
 
-    logger.Debug("InitCors");
+    logger.Debug("InitCors Services");
 
     builder.Services.AddCors(o =>
         o.AddDefaultPolicy(b =>
             b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+}
 
+void InitCors()
+{
+    if (!applicationConfiguration.UseCors) return;
+
+    logger.Debug("InitCors");
     app.UseCors();
 }
 
@@ -148,5 +155,10 @@ void RegisterRoutes()
     app.MapPut("/get", (MeasurementQuery query) =>
     {
         return app.Services.GetService<DataRepository>()!.Get(query);
+    });
+
+    app.MapGet("/get-device-names", () =>
+    {
+        return app.Services.GetService<DataRepository>()!.GetDeviceNames();
     });
 }

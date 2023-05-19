@@ -26,10 +26,11 @@ namespace Repositories
                     query.Date,
                     query.Hour,
                     query.Temperature,
-                    query.Humidity
+                    query.Humidity,
+                    query.DeviceName
                 };
 
-            var whereStatement = PaginationUtils.GetWhereStatementFromCriterias(criterias, new List<string>() { "DATE(time_stamp)", "HOUR(time_stamp)", "temperature", "humidity" }, 2);
+            var whereStatement = PaginationUtils.GetWhereStatementFromCriterias(criterias, new List<string>() { "DATE(time_stamp)", "HOUR(time_stamp)", "temperature", "humidity", "device_name" }, 2);
             var sql = $"SELECT DATE(time_stamp) AS time_stamp_date, HOUR(time_stamp) AS time_stamp_hour, AVG(temperature) AS temperature, AVG(humidity) AS humidity, device_name FROM measurements {whereStatement.Item1} GROUP BY time_stamp_date, time_stamp_hour, device_name ORDER BY DATE(time_stamp) DESC, HOUR(time_stamp) ASC LIMIT @0 OFFSET @1";
 
             return DatabaseRepository.ExecuteReader(sql, new List<object>() { query.Limit, query.Offset }.Concat(whereStatement.Item2).ToArray()).
@@ -43,5 +44,9 @@ namespace Repositories
                    });
         }
 
+        public IEnumerable<string> GetDeviceNames()
+        {
+            return DatabaseRepository.ExecuteReader("SELECT DISTINCT device_name FROM measurements").Rows.Select(x => x.GetValue<string>("device_name"));
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace DhtApi.Models
         public Criteria? Hour { get; set; }
         public Criteria? Temperature { get; set; }
         public Criteria? Humidity { get; set; }
+        public Criteria? DeviceName { get; set; }
     }
 }

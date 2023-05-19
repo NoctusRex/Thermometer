@@ -1,3 +1,4 @@
-﻿ThermometerApi/.vs
-ThermometerApi/ThermometerApi/bin
-ThermometerApi/ThermometerApi/obj
+﻿Server/.vs
+Server/ThermometerApi/bin
+Server/ThermometerApi/obj
+Client/thermometer-client/.vscode
