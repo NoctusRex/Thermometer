@@ -140,9 +140,9 @@ void RegisterRoutes()
 {
     logger.Debug("Register routes");
 
-    app.MapGet("/set", (decimal temperature, decimal humidity) =>
+    app.MapGet("/set", (decimal temperature, decimal humidity, string deviceName) =>
     {
-        app.Services.GetService<DataRepository>()!.Set(temperature, humidity);
+        app.Services.GetService<DataRepository>()!.Set(temperature, humidity, deviceName);
     });
 
     app.MapPut("/get", (MeasurementQuery query) =>

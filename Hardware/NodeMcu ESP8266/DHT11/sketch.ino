@@ -2,16 +2,16 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
-#define DHT_PIN 2 // change pin if needed
+#define DHT_PIN 2 // Change data pin if needed
 #define DHT_TYPE DHT11
 
 DHT dht(DHT_PIN, DHT_TYPE);
 
-const char* ssid = "<Your WLAN Name>";
-const char* password = "<Your Wlan password>";
-const char* host = "<Your server ip or host name (without http://)>";
+const char* ssid = ""; // Your wlan SSID
+const char* password = ""; // Your wlan password
+const char* host = ""; // Your server host (ip or hostname)
 const int port = 80; // Your server port
-const char* deviceName = ""; // your thermometer name (e.g. the location where it is, like 'kitchen')
+const char* deviceName = ""; // Your thermometer name (e.g. the location where it is, like 'kitchen') - you have to escape special chars (e.g. Space [%20])yourself ;)
 
 void setup() {
   Serial.begin(9600);
@@ -59,7 +59,7 @@ void loop() {
 
   Serial.print("connected");
 
-  String url = "/set?temperature="+ String(temperature) + "&humidity=" + String(humidity);
+  String url = "/set?temperature="+ String(temperature) + "&humidity=" + String(humidity) + "&deviceName=" + deviceName;
   Serial.print("Requesting URL: ");
   Serial.println(url);
   
