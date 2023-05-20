@@ -5,6 +5,11 @@
   import moment from "moment";
   import type { Measurement } from "./models/measurement";
 
+  onMount(() => {
+    getConfig().then(() => getDeviceNames());
+  });
+
+  let config: any;
   let options: Array<{ label: string; value: any }>;
   let deviceName: string;
   let date = moment().format("YYYY-MM-DD");
@@ -53,8 +58,6 @@
     height: 440,
   };
 
-  onMount(getDeviceNames);
-
   function handleDeviceNameChanged(event: CustomEvent<string>): void {
     deviceName = event.detail;
 
@@ -78,7 +81,7 @@
 
   async function get() {
     try {
-      const response = await fetch("http://localhost/get", {
+      const response = await fetch(`${config.server}/get`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -128,11 +131,24 @@
 
   async function getDeviceNames() {
     try {
-      const response = await fetch("http://localhost/get-device-names");
+      const response = await fetch(`${config.server}/get-device-names`);
       if (response.ok) {
         options = ((await response.json()) as Array<string>).map(
           (x) => ({ label: x, value: x } as { label: string; value: string })
         );
+      } else {
+        console.error("Request failed with status", response.status);
+      }
+    } catch (error) {
+      console.error("Request failed:", error);
+    }
+  }
+
+  async function getConfig() {
+    try {
+      const response = await fetch("config.json");
+      if (response.ok) {
+        config = await response.json();
       } else {
         console.error("Request failed with status", response.status);
       }
