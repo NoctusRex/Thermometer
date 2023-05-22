@@ -6,7 +6,6 @@
 
   // options for the select control
   export let options: Array<{ value: any; label: string }> = [];
-  export let id = "selectControl";
   export let label = "Select an option";
   export let resetAfterSelect = false;
 
@@ -21,9 +20,28 @@
   }
 </script>
 
-<label for={id}>{label}:</label>
-<select {id} bind:value={selectedOption} on:change={handleSelect}>
-  {#each options as option}
-    <option value={option.value}>{option.label}</option>
-  {/each}
-</select>
+<div class="input-container">
+  <label class="label">{label}</label>
+  <select bind:value={selectedOption} on:change={handleSelect} class="select">
+    {#each options as option}
+      <option value={option.value}>{option.label}</option>
+    {/each}
+  </select>
+</div>
+
+<style>
+  .input-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .label {
+    min-width: 5rem;
+    padding-right: 10px;
+  }
+
+  select {
+    min-width: 10rem;
+    box-sizing: border-box;
+  }
+</style>

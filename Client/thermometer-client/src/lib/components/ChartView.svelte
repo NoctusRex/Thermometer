@@ -6,6 +6,7 @@
   import type { Measurement } from "../../models/measurement";
   import { min, max, meanBy } from "lodash-es";
   import { fetchData, fetchDeviceNames } from "../modules/api";
+  import DateInput from "./DateInput.svelte";
 
   onMount(() => {
     fetchDeviceNames().then(
@@ -20,9 +21,9 @@
   const dispatch = createEventDispatcher();
 
   export let deviceName: string;
-  export let showTemperature = true;
-  export let showHumiditiy = true;
-  export let showDetail = false;
+  let showTemperature = true;
+  let showHumiditiy = true;
+  let showDetail = false;
 
   let deviceNames: Array<{ label: string; value: any }>;
   let date = moment().format("YYYY-MM-DD");
@@ -57,19 +58,24 @@
         width: 2,
       },
       mode: "lines+markers+text",
-      textposition: "top",
+      textposition: "top center",
     },
   ];
+  let mergedData: Array<any> = [];
   let layout = {
     xaxis: {
       dtick: 1,
+      range: [-0.5, 23.5],
     },
     yaxis: {
-      visible: false,
+      visible: true,
+      dtick: 10,
+      range: [-10, 100],
     },
     autosize: true,
-    height: 270,
+    height: 200,
     margin: { t: 0, b: 20 },
+    showlegend: false,
   };
 
   function handleDeviceNameChanged(event: CustomEvent<string>): void {
@@ -78,17 +84,19 @@
     get();
   }
 
+  function handleDateChanged(event: CustomEvent<string>): void {
+    if (!moment(event.detail).isValid()) return;
+    date = event.detail;
+
+    get();
+  }
+
   function handleRemoveChart(): void {
     dispatch("remove");
   }
 
-  function handleShowPrevious(): void {
-    date = moment(date).add(-1, "days").format("YYYY-MM-DD");
-    get();
-  }
-
-  function handleShowNext(): void {
-    date = moment(date).add(1, "days").format("YYYY-MM-DD");
+  function handleShow(days: number): void {
+    date = moment(date).add(days, "days").format("YYYY-MM-DD");
     get();
   }
 
@@ -97,12 +105,27 @@
     get();
   }
 
+  function updateMergedData(): void {
+    if (showTemperature && !showHumiditiy) {
+      layout.yaxis.range = [-10, 50];
+      mergedData = [...chartTemperatureData];
+    } else if (!showTemperature && showHumiditiy) {
+      layout.yaxis.range = [0, 100];
+      mergedData = [...chartHumidityData];
+    } else if (showTemperature && showHumiditiy) {
+      layout.yaxis.range = [-10, 100];
+      mergedData = [...chartTemperatureData, ...chartHumidityData];
+    } else if (!showTemperature && !showHumiditiy) {
+      mergedData = [];
+    }
+  }
+
   async function get() {
     data = await fetchData(deviceName, date);
 
     const filledMeasurements: Array<Measurement> = [];
 
-    for (let i = 0; i < 23; i++) {
+    for (let i = 0; i < 24; i++) {
       let measurement = data.find((x) => x.hour == i);
 
       if (!measurement) {
@@ -124,6 +147,8 @@
     chartHumidityData[0].text = filledMeasurements.map(
       (x) => `${x.humidity?.toFixed(1)} %`
     );
+
+    updateMergedData();
   }
 </script>
 
@@ -132,13 +157,15 @@
     {#if showDetail}
       <div class="segments">
         <div class="segment">
-          <p>Date: {date}</p>
-          <Select
-            options={deviceNames}
-            label="Device"
-            selectedOption={deviceName}
-            on:valueChanged={handleDeviceNameChanged}
-          />
+          <p><DateInput value={date} on:enter={handleDateChanged} /></p>
+          <p>
+            <Select
+              options={deviceNames}
+              label="Device"
+              selectedOption={deviceName}
+              on:valueChanged={handleDeviceNameChanged}
+            />
+          </p>
         </div>
         <div class="segment">
           <p>
@@ -159,30 +186,54 @@
     {/if}
 
     <div class="footer">
-      <div class="segment">{deviceName}</div>
-      <div class="segment">{date}</div>
+      <div class="segment"><strong>Device:</strong> {deviceName}</div>
+      <div class="segment"><strong>Date:</strong> {date}</div>
       <div class="segment">
-        <button disabled={!deviceName} on:click={handleShowPrevious}
-          >Previous</button
+        <button disabled={!deviceName} on:click={() => handleShow(-1)}>←</button
         >
-        <button disabled={!deviceName} on:click={handleShowToday}>Today</button>
-        <button disabled={!deviceName} on:click={handleShowNext}>Next</button>
-        {#if showTemperature}
-          <button on:click={() => (showTemperature = false)}
-            >Hide Temperature</button
+        {#if date === moment().format("YYYY-MM-DD")}
+          <button disabled={!deviceName} on:click={() => handleShow(0)}
+            >↺</button
           >
         {:else}
-          <button on:click={() => (showTemperature = true)}
-            >Show Temperature</button
+          <button disabled={!deviceName} on:click={handleShowToday}
+            >Today</button
+          >
+        {/if}
+        <button
+          disabled={!deviceName || date === moment().format("YYYY-MM-DD")}
+          on:click={() => handleShow(1)}>→</button
+        >
+
+        {#if showTemperature}
+          <button
+            on:click={() => {
+              showTemperature = false;
+              updateMergedData();
+            }}>Hide Temperature</button
+          >
+        {:else}
+          <button
+            on:click={() => {
+              showTemperature = true;
+              updateMergedData();
+            }}>Show Temperature</button
           >
         {/if}
 
         {#if showHumiditiy}
-          <button on:click={() => (showHumiditiy = false)}
-            >Hide Humiditiy</button
+          <button
+            on:click={() => {
+              showHumiditiy = false;
+              updateMergedData();
+            }}>Hide Humiditiy</button
           >
         {:else}
-          <button on:click={() => (showHumiditiy = true)}>Show Humiditiy</button
+          <button
+            on:click={() => {
+              showHumiditiy = true;
+              updateMergedData();
+            }}>Show Humiditiy</button
           >
         {/if}
 
@@ -197,18 +248,14 @@
     </div>
   </div>
 
-  {#if showTemperature}
-    <Chart data={chartTemperatureData} {layout} />
-  {/if}
-
-  <br />
-
-  {#if showHumiditiy}
-    <Chart data={chartHumidityData} {layout} />
-  {/if}
+  <Chart data={mergedData} {layout} />
 </main>
 
 <style lang="scss">
+  main {
+    background-color: lightgray;
+  }
+
   .container {
     padding: 0.25rem;
   }
