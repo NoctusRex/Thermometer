@@ -1,53 +1,30 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import ChartView from "./lib/components/ChartView.svelte";
-  import { fetchDeviceNames } from "./lib/modules/api";
-  import Select from "./lib/components/Select.svelte";
-  import moment from "moment";
+  import ChartViews from "./lib/components/ChartViews.svelte";
+  import MonthViews from "./lib/components/MonthViews.svelte";
 
-  type Chart = { deviceName: string; id: string };
-
-  onMount(() => {
-    fetchDeviceNames().then(
-      (x) => (deviceNames = x.map((x) => ({ value: x, label: x })))
-    );
-  });
-
-  let deviceNames: Array<{ label: string; value: any }> = [];
-  let charts: Array<Chart> = [];
-
-  function handleDeviceNameChanged(event: CustomEvent<string>): void {
-    charts = [
-      ...charts,
-      { deviceName: event.detail, id: moment().toISOString(true) } as Chart,
-    ];
-  }
-
-  function handleRemoveChart(chart: Chart) {
-    charts = charts.filter((x) => x.id !== chart.id);
-  }
+  let view: "day" | "month" = "day";
 </script>
 
 <main>
   <div class="header">
-    <Select
-      options={deviceNames}
-      label="Add Device Chart"
-      resetAfterSelect={true}
-      on:valueChanged={handleDeviceNameChanged}
-    />
+    <button
+      on:click={() => (view = "day")}
+      style="background-color: {view === 'day' ? 'aquamarine' : ''}"
+    >
+      Day
+    </button>
+    <button
+      on:click={() => (view = "month")}
+      style="background-color: {view === 'month' ? 'aquamarine' : ''}"
+    >
+      Month
+    </button>
   </div>
-
-  <div class="container">
-    {#each charts as chart (chart.id)}
-      <div class="item">
-        <ChartView
-          deviceName={chart.deviceName}
-          on:remove={() => handleRemoveChart(chart)}
-        />
-        <hr />
-      </div>
-    {/each}
+  <div class:hidden={view !== "day"}>
+    <ChartViews />
+  </div>
+  <div class:hidden={view !== "month"}>
+    <MonthViews />
   </div>
 </main>
 
@@ -64,13 +41,10 @@
     z-index: 9994;
   }
 
-  .container {
-    display: flex;
-    flex-direction: column;
-    padding-top: 25px;
-  }
-
-  .item {
-    width: 100%;
+  .hidden {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 </style>

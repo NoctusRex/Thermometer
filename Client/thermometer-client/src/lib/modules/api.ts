@@ -2,7 +2,7 @@ import moment from "moment";
 import type { Measurement } from "../../models/measurement";
 import { find } from "lodash-es";
 
-const cache: Array<{
+const dayCache: Array<{
   deviceName: string;
   date: string;
   data: Array<Measurement>;
@@ -18,12 +18,12 @@ export async function fetchConfig(): Promise<{ server: string }> {
   return await get<{ server: string }>("config.json");
 }
 
-export async function fetchData(
+export async function fetchDataForDay(
   deviceName: string,
   date: string
 ): Promise<Array<Measurement>> {
   const cachedValue = find(
-    cache,
+    dayCache,
     (x) => x.deviceName === deviceName && x.date === date
   );
   if (cachedValue) {
@@ -47,11 +47,12 @@ export async function fetchData(
           negate: false,
           or: false,
         },
+        groupBy: "hour",
       });
     })
     .then((data) => {
       if (date !== moment().format("YYYY-MM-DD")) {
-        cache.push({
+        dayCache.push({
           date,
           deviceName,
           data,
@@ -60,6 +61,32 @@ export async function fetchData(
 
       return data;
     });
+}
+
+export async function fetchDataForMonth(
+  deviceName: string,
+  minDate: string,
+  maxDate: string
+): Promise<Array<Measurement>> {
+  return fetchConfig().then((config) => {
+    return put<Array<Measurement>>(`${config.server}/get`, {
+      limit: 31,
+      offset: 0,
+      deviceName: {
+        min: deviceName,
+        max: deviceName,
+        negate: false,
+        or: false,
+      },
+      date: {
+        min: minDate,
+        max: maxDate,
+        negate: false,
+        or: false,
+      },
+      groupBy: "day",
+    });
+  });
 }
 
 async function get<T>(url: string): Promise<T> {

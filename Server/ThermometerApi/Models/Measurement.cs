@@ -2,9 +2,16 @@
 {
     public class Measurement
     {
-        public DateTime Date { get; set; }
-        public int Hour { get; set; }
-        public decimal Temperature { get; set; }
-        public decimal Humidity { get; set; }
+        public DateTime TimeStamp { get; set; }
+        public MeasurementRange Temperature { get; set; } = new();
+        public MeasurementRange Humidity { get; set; } = new();
+        public string Device { get; set; } = string.Empty;
+    }
+
+    public class MeasurementRange
+    {
+        public decimal Average { get; set; }
+        public decimal Min { get; set; }
+        public decimal Max { get; set; }
     }
 }

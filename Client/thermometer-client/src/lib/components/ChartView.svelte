@@ -3,9 +3,9 @@
   import Chart from "./Chart.svelte";
   import Select from "./Select.svelte";
   import moment from "moment";
-  import type { Measurement } from "../../models/measurement";
+  import type { Measurement, MeasurementRange } from "../../models/measurement";
   import { min, max, meanBy } from "lodash-es";
-  import { fetchData, fetchDeviceNames } from "../modules/api";
+  import { fetchDataForDay, fetchDeviceNames } from "../modules/api";
   import DateInput from "./DateInput.svelte";
 
   onMount(() => {
@@ -24,6 +24,7 @@
   let showTemperature = true;
   let showHumiditiy = true;
   let showDetail = false;
+  let dataset: "min" | "avg" | "max" = "avg";
 
   let deviceNames: Array<{ label: string; value: any }>;
   let date = moment().format("YYYY-MM-DD");
@@ -91,6 +92,12 @@
     get();
   }
 
+  function handleDatasetChanged(event: CustomEvent<string>): void {
+    dataset = event.detail as "min" | "avg" | "max";
+
+    get(false);
+  }
+
   function handleRemoveChart(): void {
     dispatch("remove");
   }
@@ -120,35 +127,53 @@
     }
   }
 
-  async function get() {
-    data = await fetchData(deviceName, date);
+  async function get(fetch: boolean = true) {
+    if (fetch) {
+      data = await fetchDataForDay(deviceName, date);
+    }
 
     const filledMeasurements: Array<Measurement> = [];
 
     for (let i = 0; i < 24; i++) {
-      let measurement = data.find((x) => x.hour == i);
+      let measurement = data.find((x) => moment(x.timeStamp).hour() == i);
 
       if (!measurement) {
-        measurement = { date, hour: i, temperature: null, humidity: null };
+        measurement = {
+          timeStamp: date,
+          device: deviceName,
+          temperature: null,
+          humidity: null,
+        };
       }
 
       filledMeasurements.push(measurement);
     }
 
     chartTemperatureData[0].y = filledMeasurements.map((x) =>
-      x.temperature?.toFixed(1)
+      getValue(x.temperature)
     );
     chartTemperatureData[0].text = filledMeasurements.map(
-      (x) => `${x.temperature?.toFixed(1)} °C`
+      (x) => `${getValue(x.temperature)} °C`
     );
     chartHumidityData[0].y = filledMeasurements.map((x) =>
-      x.humidity?.toFixed(1)
+      getValue(x.humidity)
     );
     chartHumidityData[0].text = filledMeasurements.map(
-      (x) => `${x.humidity?.toFixed(1)} %`
+      (x) => `${getValue(x.humidity)} %`
     );
 
     updateMergedData();
+  }
+
+  function getValue(measurement: MeasurementRange): string {
+    switch (dataset) {
+      case "min":
+        return measurement?.min?.toFixed(1);
+      case "avg":
+        return measurement?.average?.toFixed(1);
+      case "max":
+        return measurement?.max?.toFixed(1);
+    }
   }
 </script>
 
@@ -166,21 +191,47 @@
               on:valueChanged={handleDeviceNameChanged}
             />
           </p>
+          <p>
+            <Select
+              options={[
+                { label: "Min", value: "min" },
+                { label: "Max", value: "max" },
+                { label: "Average", value: "avg" },
+              ]}
+              label="Dataset"
+              selectedOption={dataset}
+              on:valueChanged={handleDatasetChanged}
+            />
+          </p>
         </div>
         <div class="segment">
           <p>
-            Min Temperature: {min(data?.map((x) => x.temperature.toFixed(1)))}
+            Min Temperature: {min(
+              data?.map((x) => x.temperature.min.toFixed(1))
+            )}
             °C
           </p>
           <p>
-            Max Temperature: {max(data?.map((x) => x.temperature.toFixed(1)))} °C
+            Max Temperature: {max(
+              data?.map((x) => x.temperature.max.toFixed(1))
+            )} °C
           </p>
-          <p>Avg Temperature: {meanBy(data, "temperature").toFixed(1)} °C</p>
+          <p>
+            Avg Temperature: {meanBy(data, "temperature.average").toFixed(1)} °C
+          </p>
         </div>
         <div class="segment">
-          <p>Min Humiditiy: {min(data?.map((x) => x.humidity.toFixed(1)))} %</p>
-          <p>Max Humiditiy: {max(data?.map((x) => x.humidity.toFixed(1)))} %</p>
-          <p>Avg Humiditiy: {meanBy(data, "humidity").toFixed(1)} %</p>
+          <p>
+            Min Humiditiy: {min(
+              data?.map((x) => x.humidity.average.toFixed(1))
+            )} %
+          </p>
+          <p>
+            Max Humiditiy: {max(
+              data?.map((x) => x.humidity.average.toFixed(1))
+            )} %
+          </p>
+          <p>Avg Humiditiy: {meanBy(data, "humidity.average").toFixed(1)} %</p>
         </div>
       </div>
     {/if}

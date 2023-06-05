@@ -1,6 +1,12 @@
 export interface Measurement {
-  date: string;
-  hour: number;
-  temperature: number;
-  humidity: number;
+  timeStamp: string;
+  device: string;
+  temperature: MeasurementRange;
+  humidity: MeasurementRange;
+}
+
+export interface MeasurementRange {
+  min: number;
+  max: number;
+  average: number;
 }
