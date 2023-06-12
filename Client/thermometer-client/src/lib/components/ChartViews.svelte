@@ -5,7 +5,7 @@
   import Select from "./Select.svelte";
   import moment from "moment";
 
-  type Chart = { deviceName: string; id: string };
+  type Chart = { deviceName: string; id: string; date: string };
 
   onMount(() => {
     fetchDeviceNames().then(
@@ -26,6 +26,13 @@
   function handleRemoveChart(chart: Chart) {
     charts = charts.filter((x) => x.id !== chart.id);
   }
+
+  export function addDay(date: string, deviceName: string) {
+    charts = [
+      ...charts,
+      { deviceName, id: moment().toISOString(true), date } as Chart,
+    ];
+  }
 </script>
 
 <main>
@@ -43,6 +50,7 @@
       <div class="item">
         <ChartView
           deviceName={chart.deviceName}
+          date={chart.date}
           on:remove={() => handleRemoveChart(chart)}
         />
         <hr />

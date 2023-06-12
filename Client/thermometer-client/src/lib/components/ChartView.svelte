@@ -27,7 +27,7 @@
   let dataset: "min" | "avg" | "max" = "avg";
 
   let deviceNames: Array<{ label: string; value: any }>;
-  let date = moment().format("YYYY-MM-DD");
+  export let date = moment().toISOString(true);
   let data: Array<Measurement>;
 
   let chartTemperatureData = [
@@ -129,7 +129,10 @@
 
   async function get(fetch: boolean = true) {
     if (fetch) {
-      data = await fetchDataForDay(deviceName, date);
+      data = await fetchDataForDay(
+        deviceName,
+        moment(date).format("YYYY-MM-DD")
+      );
     }
 
     const filledMeasurements: Array<Measurement> = [];
@@ -238,7 +241,10 @@
 
     <div class="footer">
       <div class="segment"><strong>Device:</strong> {deviceName}</div>
-      <div class="segment"><strong>Date:</strong> {date}</div>
+      <div class="segment">
+        <strong>Date:</strong>
+        {moment(date).format("YYYY-MM-DD")}
+      </div>
       <div class="segment">
         <button disabled={!deviceName} on:click={() => handleShow(-1)}>←</button
         >

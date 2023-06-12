@@ -67,17 +67,17 @@
     if (fetch) {
       data = await fetchDataForMonth(deviceName, startOfMonth, endOfMonth);
     }
-    console.warn(data);
-    const filledDays: Array<Measurement> = [];
 
-    for (let i = 1; i < 32; i++) {
+    let filledDays: Array<Measurement> = [];
+
+    for (let i = 1; i < moment(date).daysInMonth() + 1; i++) {
       let measurement = data.find(
         (x) => moment(x.timeStamp).format("D") == i.toString()
       );
 
       if (!measurement) {
         measurement = {
-          timeStamp: moment(date).set("day", i).toISOString(true),
+          timeStamp: moment(date).set("date", i).toISOString(true),
           device: deviceName,
           temperature: null,
           humidity: null,
@@ -179,6 +179,12 @@
     if (humidity > 50) {
       return "orange";
     }
+  }
+
+  function handleOpenDay(day: Measurement) {
+    if (day.timeStamp === null) return;
+
+    dispatch("openDay", { date: day.timeStamp, deviceName: deviceName });
   }
 </script>
 
@@ -317,7 +323,11 @@
     <div class="grid-header"><strong>Sat</strong></div>
     <div class="grid-header"><strong>Sun</strong></div>
     {#each data as day}
-      <div class="grid-item calendar-segments">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div
+        class="grid-item calendar-segments"
+        on:click={() => handleOpenDay(day)}
+      >
         {#if day.timeStamp !== null}
           <div class="calendar-segment-header">
             <strong>{moment(day.timeStamp).format("D")}</strong>
@@ -373,10 +383,6 @@
     flex-direction: column;
   }
 
-  .calendar-segment {
-    //
-  }
-
   .calendar-segment-header {
     padding-bottom: 0.5rem;
     color: black;
@@ -412,6 +418,12 @@
     width: 75px;
     height: 75px;
     background-color: white;
-    color: white;
+    color: black;
+    text-shadow: 0 0 3px white, 0 0 3px white;
+  }
+
+  .grid-item:hover {
+    background-color: lightblue;
+    cursor: pointer;
   }
 </style>

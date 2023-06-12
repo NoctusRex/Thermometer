@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import { fetchDeviceNames } from "../modules/api";
   import Select from "./Select.svelte";
   import moment from "moment";
   import MonthView from "./MonthView.svelte";
 
   type Chart = { deviceName: string; id: string };
+
+  const dispatch = createEventDispatcher();
 
   onMount(() => {
     fetchDeviceNames().then(
@@ -26,6 +28,10 @@
   function handleRemoveChart(chart: Chart) {
     charts = charts.filter((x) => x.id !== chart.id);
   }
+
+  function handleOpenDay(event) {
+    dispatch("openDay", event.detail);
+  }
 </script>
 
 <main>
@@ -44,6 +50,7 @@
         <MonthView
           deviceName={chart.deviceName}
           on:remove={() => handleRemoveChart(chart)}
+          on:openDay={handleOpenDay}
         />
         <hr />
       </div>

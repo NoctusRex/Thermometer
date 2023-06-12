@@ -3,6 +3,13 @@
   import MonthViews from "./lib/components/MonthViews.svelte";
 
   let view: "day" | "month" = "day";
+  let chartViews: ChartViews;
+
+  function handleOpenDay(event) {
+    view = "day";
+
+    chartViews.addDay(event.detail.date, event.detail.deviceName);
+  }
 </script>
 
 <main>
@@ -21,10 +28,10 @@
     </button>
   </div>
   <div class:hidden={view !== "day"}>
-    <ChartViews />
+    <ChartViews bind:this={chartViews} />
   </div>
   <div class:hidden={view !== "month"}>
-    <MonthViews />
+    <MonthViews on:openDay={handleOpenDay} />
   </div>
 </main>
 

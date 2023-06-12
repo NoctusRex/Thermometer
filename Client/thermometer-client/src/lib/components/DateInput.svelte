@@ -18,6 +18,7 @@
 </script>
 
 <div class="input-container">
+  <!-- svelte-ignore a11y-label-has-associated-control -->
   <label class="label">{label}</label>
   <input
     type="date"
