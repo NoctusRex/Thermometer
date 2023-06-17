@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThermometerApi", "ThermometerApi\ThermometerApi.csproj", "{01DA0FC2-5F3B-4D33-B456-D95E42D08F4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{FEA5F23A-75C9-4AE8-AFBC-24D09CFDF838}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{01DA0FC2-5F3B-4D33-B456-D95E42D08F4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01DA0FC2-5F3B-4D33-B456-D95E42D08F4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01DA0FC2-5F3B-4D33-B456-D95E42D08F4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEA5F23A-75C9-4AE8-AFBC-24D09CFDF838}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEA5F23A-75C9-4AE8-AFBC-24D09CFDF838}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEA5F23A-75C9-4AE8-AFBC-24D09CFDF838}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEA5F23A-75C9-4AE8-AFBC-24D09CFDF838}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
