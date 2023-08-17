@@ -6,6 +6,7 @@
   import { min, max, meanBy, filter } from "lodash-es";
   import { fetchDataForMonth, fetchDeviceNames } from "../modules/api";
   import DateInput from "./DateInput.svelte";
+  import Chart from "./Chart.svelte";
 
   onMount(() => {
     fetchDeviceNames().then(
@@ -19,6 +20,7 @@
   const dispatch = createEventDispatcher();
 
   export let deviceName: string;
+  let useCalendarView = true;
   let showTemperature = true;
   let showHumiditiy = true;
   let showDetail = false;
@@ -26,6 +28,69 @@
   let deviceNames: Array<{ label: string; value: any }>;
   let date = moment().format("YYYY-MM-DD");
   let data: Array<Measurement> = [];
+  let layout = {
+    xaxis: {
+      dtick: 1,
+      range: [0.5, 31.5],
+    },
+    yaxis: {
+      visible: true,
+      dtick: 10,
+      range: [-10, 100],
+    },
+    autosize: true,
+    height: 200,
+    margin: { t: 0, b: 20 },
+    showlegend: false,
+  };
+  let chartTemperatureData = [
+    {
+      x: [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+      ],
+      y: [],
+      text: [],
+      line: {
+        color: "green",
+        width: 2,
+      },
+      mode: "lines+markers+text",
+      textposition: "top center",
+    },
+  ];
+  let chartHumidityData = [
+    {
+      x: [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+      ],
+      y: [],
+      text: [],
+      line: {
+        color: "blue",
+        width: 2,
+      },
+      mode: "lines+markers+text",
+      textposition: "top center",
+    },
+  ];
+  let mergedData: Array<any> = [];
+
+  function updateMergedData(): void {
+    if (showTemperature && !showHumiditiy) {
+      layout.yaxis.range = [-10, 50];
+      mergedData = [...chartTemperatureData];
+    } else if (!showTemperature && showHumiditiy) {
+      layout.yaxis.range = [0, 100];
+      mergedData = [...chartHumidityData];
+    } else if (showTemperature && showHumiditiy) {
+      layout.yaxis.range = [-10, 100];
+      mergedData = [...chartTemperatureData, ...chartHumidityData];
+    } else if (!showTemperature && !showHumiditiy) {
+      mergedData = [];
+    }
+  }
 
   function handleDeviceNameChanged(event: CustomEvent<string>): void {
     deviceName = event.detail;
@@ -123,7 +188,15 @@
       });
     }
 
+    chartTemperatureData[0].y = data.map((x) => getValue(x.temperature));
+    chartTemperatureData[0].text = data.map(
+      (x) => `${getValue(x.temperature)} °C`
+    );
+    chartHumidityData[0].y = data.map((x) => getValue(x.humidity));
+    chartHumidityData[0].text = data.map((x) => `${getValue(x.humidity)} %`);
+
     data = filledDays;
+    updateMergedData();
   }
 
   function getValue(measurement: MeasurementRange): string {
@@ -279,12 +352,14 @@
           <button
             on:click={() => {
               showTemperature = false;
+              updateMergedData();
             }}>Hide Temperature</button
           >
         {:else}
           <button
             on:click={() => {
               showTemperature = true;
+              updateMergedData();
             }}>Show Temperature</button
           >
         {/if}
@@ -293,13 +368,23 @@
           <button
             on:click={() => {
               showHumiditiy = false;
+              updateMergedData();
             }}>Hide Humiditiy</button
           >
         {:else}
           <button
             on:click={() => {
               showHumiditiy = true;
+              updateMergedData();
             }}>Show Humiditiy</button
+          >
+        {/if}
+
+        {#if useCalendarView}
+          <button on:click={() => (useCalendarView = false)}>Graph View</button>
+        {:else}
+          <button on:click={() => (useCalendarView = true)}
+            >Calendar View</button
           >
         {/if}
 
@@ -314,50 +399,54 @@
     </div>
   </div>
 
-  <div class="grid-container">
-    <div class="grid-header"><strong>Mon</strong></div>
-    <div class="grid-header"><strong>Tue</strong></div>
-    <div class="grid-header"><strong>Wed</strong></div>
-    <div class="grid-header"><strong>Thu</strong></div>
-    <div class="grid-header"><strong>Fri</strong></div>
-    <div class="grid-header"><strong>Sat</strong></div>
-    <div class="grid-header"><strong>Sun</strong></div>
-    {#each data as day}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div
-        class="grid-item calendar-segments"
-        on:click={() => handleOpenDay(day)}
-      >
-        {#if day.timeStamp !== null}
-          <div class="calendar-segment-header">
-            <strong>{moment(day.timeStamp).format("D")}</strong>
-          </div>
-
-          {#if day.temperature !== null && showTemperature}
-            <div
-              class="calendar-segment"
-              style="background: {getColorByTemperature(
-                Number(getValue(day.temperature))
-              )}"
-            >
-              {getValue(day?.temperature)} °C
+  {#if useCalendarView}
+    <div class="grid-container">
+      <div class="grid-header"><strong>Mon</strong></div>
+      <div class="grid-header"><strong>Tue</strong></div>
+      <div class="grid-header"><strong>Wed</strong></div>
+      <div class="grid-header"><strong>Thu</strong></div>
+      <div class="grid-header"><strong>Fri</strong></div>
+      <div class="grid-header"><strong>Sat</strong></div>
+      <div class="grid-header"><strong>Sun</strong></div>
+      {#each data as day}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div
+          class="grid-item calendar-segments"
+          on:click={() => handleOpenDay(day)}
+        >
+          {#if day.timeStamp !== null}
+            <div class="calendar-segment-header">
+              <strong>{moment(day.timeStamp).format("D")}</strong>
             </div>
-          {/if}
 
-          {#if day.humidity !== null && showHumiditiy}
-            <div
-              class="calendar-segment"
-              style="background: {getColorByHumidity(
-                Number(getValue(day.humidity))
-              )}"
-            >
-              {getValue(day?.humidity)} %
-            </div>
+            {#if day.temperature !== null && showTemperature}
+              <div
+                class="calendar-segment"
+                style="background: {getColorByTemperature(
+                  Number(getValue(day.temperature))
+                )}"
+              >
+                {getValue(day?.temperature)} °C
+              </div>
+            {/if}
+
+            {#if day.humidity !== null && showHumiditiy}
+              <div
+                class="calendar-segment"
+                style="background: {getColorByHumidity(
+                  Number(getValue(day.humidity))
+                )}"
+              >
+                {getValue(day?.humidity)} %
+              </div>
+            {/if}
           {/if}
-        {/if}
-      </div>
-    {/each}
-  </div>
+        </div>
+      {/each}
+    </div>
+  {:else}
+    <Chart data={mergedData} {layout} />
+  {/if}
 </main>
 
 <style lang="scss">

@@ -7,7 +7,8 @@ namespace DhtApi.Models
     {
         None,
         Hour,
-        Day
+        Day,
+        Month
     }
 
     public class MeasurementQuery: Query

@@ -31,11 +31,11 @@ namespace Repositories
                 };
 
             var whereStatement = PaginationUtils.GetWhereStatementFromCriterias(criterias, new List<string>() { "DATE(time_stamp)", "HOUR(time_stamp)", "temperature", "humidity", "device_name" }, 2);
-            var sql = "SELECT DATE(time_stamp) AS time_stamp_date, HOUR(time_stamp) AS time_stamp_hour, AVG(temperature) AS temperature, AVG(humidity) AS humidity, MIN(temperature) AS min_temperature, MIN(humidity) AS min_humidity, MAX(temperature) AS max_temperature, MAX(humidity) AS max_humidity, device_name, time_stamp ";
+            var sql = "SELECT DATE(time_stamp) AS time_stamp_date, HOUR(time_stamp) AS time_stamp_hour, MONTH(time_stamp) AS time_stamp_month, AVG(temperature) AS temperature, AVG(humidity) AS humidity, MIN(temperature) AS min_temperature, MIN(humidity) AS min_humidity, MAX(temperature) AS max_temperature, MAX(humidity) AS max_humidity, device_name, time_stamp ";
 
             if (query.GroupBy?.ToLower() == MeasurementQueryGroups.None.ToString().ToLower())
             {
-                sql += $"FROM measurements {whereStatement.Item1} GROUP BY time_stamp, device_name ORDER BY time_stamp DESC ";
+                sql += $"FROM measurements {whereStatement.Item1} GROUP BY time_stamp, device_name ORDER BY DATE(time_stamp) DESC ";
             }
             else if (query.GroupBy?.ToLower() == MeasurementQueryGroups.Hour.ToString().ToLower())
             {
@@ -45,9 +45,13 @@ namespace Repositories
             {
                 sql += $"FROM measurements {whereStatement.Item1} GROUP BY time_stamp_date, device_name ORDER BY DATE(time_stamp) DESC ";
             }
+            else if (query.GroupBy?.ToLower() == MeasurementQueryGroups.Month.ToString().ToLower())
+            {
+                sql += $"FROM measurements {whereStatement.Item1} GROUP BY time_stamp_month, device_name ORDER BY DATE(time_stamp) DESC ";
+            }
             else
             {
-                throw new Exception("Invalid group type. (use none, hour, day)");
+                throw new Exception("Invalid group type. (use none, hour, day, month)");
             }
             sql += "LIMIT @0 OFFSET @1";
 

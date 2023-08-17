@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { fetchDeviceNames } from "../modules/api";
   import Select from "./Select.svelte";
   import moment from "moment";
-  import MonthView from "./MonthView.svelte";
   import { settings } from "../stores/settings";
+  import YearView from "./YearView.svelte";
 
-  type Chart = { deviceName: string; id: string };
-
-  const dispatch = createEventDispatcher();
+  type Chart = { deviceName: string; id: string; date: string };
 
   onMount(() => {
     fetchDeviceNames().then(
@@ -16,7 +14,7 @@
     );
 
     $settings?.defaultDevices?.forEach((device) => {
-      addMonth(moment().toISOString(true), device);
+      addYear(moment().toISOString(true), device);
     });
   });
 
@@ -24,22 +22,18 @@
   let charts: Array<Chart> = [];
 
   function handleDeviceNameChanged(event: CustomEvent<string>): void {
-    addMonth(moment().toISOString(true), event.detail);
-  }
-
-  export function addMonth(date: string, deviceName: string) {
-    charts = [
-      ...charts,
-      { deviceName, id: moment().toISOString(true), date } as Chart,
-    ];
+    addYear(moment().toISOString(true), event.detail);
   }
 
   function handleRemoveChart(chart: Chart) {
     charts = charts.filter((x) => x.id !== chart.id);
   }
 
-  function handleOpenDay(event) {
-    dispatch("openDay", event.detail);
+  export function addYear(date: string, deviceName: string) {
+    charts = [
+      ...charts,
+      { deviceName, id: moment().toISOString(true), date } as Chart,
+    ];
   }
 </script>
 
@@ -47,7 +41,7 @@
   <div class="footer">
     <Select
       options={deviceNames}
-      label="Add Month View"
+      label="Add Year View"
       resetAfterSelect={true}
       on:valueChanged={handleDeviceNameChanged}
     />
@@ -56,10 +50,10 @@
   <div class="container">
     {#each charts as chart (chart.id)}
       <div class="item">
-        <MonthView
+        <YearView
           deviceName={chart.deviceName}
+          year={chart.date}
           on:remove={() => handleRemoveChart(chart)}
-          on:openDay={handleOpenDay}
         />
         <hr />
       </div>

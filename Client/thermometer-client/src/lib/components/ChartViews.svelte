@@ -4,6 +4,7 @@
   import { fetchDeviceNames } from "../modules/api";
   import Select from "./Select.svelte";
   import moment from "moment";
+  import { settings } from "../stores/settings";
 
   type Chart = { deviceName: string; id: string; date: string };
 
@@ -11,16 +12,17 @@
     fetchDeviceNames().then(
       (x) => (deviceNames = x?.map((x) => ({ value: x, label: x })) ?? [])
     );
+
+    $settings?.defaultDevices?.forEach((device) => {
+      addDay(moment().toISOString(true), device);
+    });
   });
 
   let deviceNames: Array<{ label: string; value: any }> = [];
   let charts: Array<Chart> = [];
 
   function handleDeviceNameChanged(event: CustomEvent<string>): void {
-    charts = [
-      ...charts,
-      { deviceName: event.detail, id: moment().toISOString(true) } as Chart,
-    ];
+    addDay(moment().toISOString(true), event.detail);
   }
 
   function handleRemoveChart(chart: Chart) {

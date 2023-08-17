@@ -89,6 +89,31 @@ export async function fetchDataForMonth(
   });
 }
 
+export async function fetchDataForYear(
+  deviceName: string,
+  year: string
+): Promise<Array<Measurement>> {
+  return fetchConfig().then((config) => {
+    return put<Array<Measurement>>(`${config.server}/get`, {
+      limit: 12,
+      offset: 0,
+      deviceName: {
+        min: deviceName,
+        max: deviceName,
+        negate: false,
+        or: false,
+      },
+      date: {
+        min: `${year}-01-01`,
+        max: `${year}-12-31`,
+        negate: false,
+        or: false,
+      },
+      groupBy: "month",
+    });
+  });
+}
+
 async function get<T>(url: string): Promise<T> {
   try {
     const response = await fetch(url);
