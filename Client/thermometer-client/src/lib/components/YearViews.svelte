@@ -41,7 +41,7 @@
   <div class="footer">
     <Select
       options={deviceNames}
-      label="Add Year View"
+      label="Add"
       resetAfterSelect={true}
       on:valueChanged={handleDeviceNameChanged}
     />

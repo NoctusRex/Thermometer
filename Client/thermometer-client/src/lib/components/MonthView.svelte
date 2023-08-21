@@ -20,7 +20,7 @@
   const dispatch = createEventDispatcher();
 
   export let deviceName: string;
-  let useCalendarView = true;
+  let useCalendarView = false;
   let showTemperature = true;
   let showHumiditiy = true;
   let showDetail = false;

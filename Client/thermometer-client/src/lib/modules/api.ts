@@ -18,6 +18,24 @@ export async function fetchConfig(): Promise<{ server: string }> {
   return await get<{ server: string }>("config.json");
 }
 
+export async function fetchDataForNow(
+  deviceName: string
+): Promise<Array<Measurement>> {
+  return fetchConfig().then((config) => {
+    return put<Array<Measurement>>(`${config.server}/get`, {
+      limit: 1,
+      offset: 0,
+      deviceName: {
+        min: deviceName,
+        max: deviceName,
+        negate: false,
+        or: false,
+      },
+      groupBy: "none",
+    });
+  });
+}
+
 export async function fetchDataForDay(
   deviceName: string,
   date: string

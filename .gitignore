@@ -4,3 +4,4 @@ Server/ThermometerApi/obj
 Client/thermometer-client/.vscode
 Server/Service/bin
 Server/Service/obj
+Client/thermometer-client/public/config.json

@@ -5,6 +5,7 @@
   import Select from "./Select.svelte";
   import moment from "moment";
   import { settings } from "../stores/settings";
+  import CurrentView from "./CurrentView.svelte";
 
   type Chart = { deviceName: string; id: string; date: string };
 
@@ -14,7 +15,7 @@
     );
 
     $settings?.defaultDevices?.forEach((device) => {
-      addDay(moment().toISOString(true), device);
+      addView(moment().toISOString(true), device);
     });
   });
 
@@ -22,14 +23,14 @@
   let charts: Array<Chart> = [];
 
   function handleDeviceNameChanged(event: CustomEvent<string>): void {
-    addDay(moment().toISOString(true), event.detail);
+    addView(moment().toISOString(true), event.detail);
   }
 
   function handleRemoveChart(chart: Chart) {
     charts = charts.filter((x) => x.id !== chart.id);
   }
 
-  export function addDay(date: string, deviceName: string) {
+  export function addView(date: string, deviceName: string) {
     charts = [
       ...charts,
       { deviceName, id: moment().toISOString(true), date } as Chart,
@@ -50,7 +51,7 @@
   <div class="container">
     {#each charts as chart (chart.id)}
       <div class="item">
-        <ChartView
+        <CurrentView
           deviceName={chart.deviceName}
           date={chart.date}
           on:remove={() => handleRemoveChart(chart)}

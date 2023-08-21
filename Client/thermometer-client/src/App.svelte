@@ -1,10 +1,11 @@
 <script lang="ts">
   import ChartViews from "./lib/components/ChartViews.svelte";
+  import CurrentViews from "./lib/components/CurrentViews.svelte";
   import MonthViews from "./lib/components/MonthViews.svelte";
   import SettingsView from "./lib/components/SettingsView.svelte";
   import YearViews from "./lib/components/YearViews.svelte";
 
-  let view: "day" | "month" | "year" | "settings" = "day";
+  let view: "current" | "day" | "month" | "year" | "settings" = "current";
   let chartViews: ChartViews;
 
   function handleOpenDay(event) {
@@ -19,22 +20,28 @@
     <div class="flex">
       <div class="left">
         <button
+          on:click={() => (view = "current")}
+          style="background-color: {view === 'current' ? 'aquamarine' : ''}"
+        >
+          Current
+        </button>
+        <button
           on:click={() => (view = "day")}
           style="background-color: {view === 'day' ? 'aquamarine' : ''}"
         >
-          Day
+          Hours
         </button>
         <button
           on:click={() => (view = "month")}
           style="background-color: {view === 'month' ? 'aquamarine' : ''}"
         >
-          Month
+          Days
         </button>
         <button
           on:click={() => (view = "year")}
           style="background-color: {view === 'year' ? 'aquamarine' : ''}"
         >
-          Year
+          Months
         </button>
       </div>
       <div class="right">
@@ -45,6 +52,9 @@
         >
       </div>
     </div>
+  </div>
+  <div class:hidden={view !== "current"}>
+    <CurrentViews />
   </div>
   <div class:hidden={view !== "day"}>
     <ChartViews bind:this={chartViews} />

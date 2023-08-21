@@ -60,7 +60,7 @@
   let layout = {
     xaxis: {
       dtick: 1,
-      range: [-0.5, 12.5],
+      range: [0.9, 12.5],
     },
     yaxis: {
       visible: true,
