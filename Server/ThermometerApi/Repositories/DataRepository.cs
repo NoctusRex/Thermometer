@@ -35,7 +35,7 @@ namespace Repositories
 
             if (query.GroupBy?.ToLower() == MeasurementQueryGroups.None.ToString().ToLower())
             {
-                sql += $"FROM measurements {whereStatement.Item1} GROUP BY time_stamp, device_name ORDER BY DATE(time_stamp) DESC ";
+                sql += $"FROM measurements {whereStatement.Item1} GROUP BY time_stamp, device_name ORDER BY time_stamp DESC ";
             }
             else if (query.GroupBy?.ToLower() == MeasurementQueryGroups.Hour.ToString().ToLower())
             {
