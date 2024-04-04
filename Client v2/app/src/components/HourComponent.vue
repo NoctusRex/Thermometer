@@ -1,11 +1,11 @@
 <template>
-  <ul>
-    <li>{{props.device}}</li>
-    <li>{{ formatters.formatDateToTime(measurement?.timeStamp) }} - Next Refresh in {{ minutesToNextRefresh }} minutes</li>
-    <li>{{ formatters.formatTemperature(measurement) }}</li>
-    <li>{{ formatters.formatHumidity(measurement) }}</li>
-    <li><button @click="refresh()">Refresh</button></li>
-</ul>
+  <div class="buttons">
+    <button @click="refresh()">Refresh</button>
+  </div>
+  <div>
+    <div></div>
+  </div>
+  <TableTemplate :measurements="[measurement]" :date="getTime()" :device="device" :time="'current'"></TableTemplate>
 </template>
 
 <script setup lang="ts">
@@ -16,6 +16,7 @@ import moment from 'moment';
 import { concatMap, interval, map, of, takeWhile, tap } from 'rxjs';
 import Store from '@/stores/store';
 import formatters from '@/hooks/useFormatters';
+import TableTemplate from '@/templates/TableTemplate';
 
 const store = inject<typeof Store>('Store');
 const measurement: Ref<Measurement> = ref({} as Measurement);
@@ -74,7 +75,12 @@ const refresh = () => {
   refresh$(true).subscribe();
 };
 
+const getTime = () => {
+  return `Next Refresh in ${minutesToNextRefresh.value} minutes - ${formatters.formatDateToTime(measurement.value?.timeStamp)}`;
+};
+
 </script>
 
 <style scoped="true">
+
 </style>

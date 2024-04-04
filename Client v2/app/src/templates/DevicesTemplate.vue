@@ -24,16 +24,12 @@ const props = defineProps<{
 <style scoped="true">
 .container {
   display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-evenly;
-  align-items: baseline;
-  column-gap: 20px;
-  padding-left: 10%;
-  padding-right: 10%;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .container-item {
-  padding: 5px;
-  width: 20%;
+  padding-top: 20px;
 }
 </style>

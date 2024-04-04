@@ -1,10 +1,10 @@
 <template>
-    <div class="buttons">
-      <button @click="changeDay(-1)">-</button>
-      <button @click="resetDay()">Today</button>
-      <button @click="changeDay(1)">+</button>
-    </div>
-    <TableTemplate :measurements="measurements" :date="date" :device="device" :time="'hour'"></TableTemplate>
+  <div class="buttons">
+    <button @click="changeMonth(-1)">-</button>
+    <button @click="resetMonth()">Today</button>
+    <button @click="changeMonth(1)">+</button>
+  </div>
+  <TableTemplate :measurements="measurements" :date="date" :device="device" :time="'month'"></TableTemplate>
 </template>
 
 <script setup lang="ts">
@@ -25,19 +25,19 @@ const props = defineProps<{
 
 const getData = (refresh = false) => {
   store?.getters
-    .getDay$(props.device, formatters.formatDate(date.value), refresh)
+    .getYear$(props.device, formatters.formatDate(date.value), refresh)
     .subscribe((data) => { measurements.value = data?.reverse(); });
 };
 
-const changeDay = (count: number) => {
-  const newDate = moment(date.value).add(count, 'days');
+const changeMonth = (count: number) => {
+  const newDate = moment(date.value).add(count, 'year');
   if (newDate.isSameOrAfter(moment())) return;
 
   date.value = newDate.toISOString(true);
   getData();
 };
 
-const resetDay = () => {
+const resetMonth = () => {
   date.value = moment().toISOString(true);
   getData(true);
 };

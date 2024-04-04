@@ -10,14 +10,27 @@ const formatHour = (date: string) => {
   return moment(date).format('HH');
 };
 
+const formatDay = (date: string) => {
+  return moment(date).format('DD. dd');
+};
+
+const formatMonth = (date: string) => {
+  return moment(date).format('MM. MMMM');
+};
+
+const formatYear = (date: string) => {
+  return moment(date).format('YYYY');
+};
+
 const formatDecimal = (decimal: number) => {
   if (!decimal) return '';
 
-  const integerPart: number = floor(decimal);
-  const decimalPart: number = round((decimal - integerPart) * 10);
-  const formattedString = `${padStart(integerPart.toString(), 2, '0')}.${padStart(trimEnd(decimalPart.toString(), '0'), 1, '0')}`;
+  let result = round(decimal, 1).toString();
+  if (!result.includes('.')) {
+    result += '.0';
+  }
 
-  return formattedString;
+  return result;
 };
 
 const getTemperature = (measurement: Measurement) => {
@@ -25,11 +38,11 @@ const getTemperature = (measurement: Measurement) => {
 };
 
 const getHumidity = (measurement: Measurement) => {
-  return `${formatDecimal(measurement.humidity?.min)} - ${formatDecimal(measurement.humidity?.average)} - ${formatDecimal(measurement.humidity?.max)} °C`;
+  return `${formatDecimal(measurement.humidity?.min)} - ${formatDecimal(measurement.humidity?.average)} - ${formatDecimal(measurement.humidity?.max)} %`;
 };
 
 const formatDateToTime = (date: string) => {
   return moment(date).format('HH:mm');
 };
 
-export default { formatDateToTime, formatHumidity: getHumidity, formatTemperature: getTemperature, formatDecimal, formatHour, formatDate };
+export default { formatYear, formatDateToTime, formatMonth, formatDay, formatHumidity: getHumidity, formatTemperature: getTemperature, formatDecimal, formatHour, formatDate };
